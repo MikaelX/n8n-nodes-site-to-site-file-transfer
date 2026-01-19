@@ -38,10 +38,17 @@ After installation, restart your n8n instance. The node will be automatically av
 
 ### Bearer Token Support
 
-If your upload URL contains a `bearer` query parameter, it will be automatically used for authentication. Example:
+If your upload URL contains a `bearer` query parameter, it will be automatically extracted and added to the `Authorization` header as `Bearer <token>`. The token will remain in the URL query string (for APIs that require it there) and also be sent in the header. Example:
 
 ```
 https://example.com/upload?bearer=eyJhbGciOiJIUzI1NiJ9...
+```
+
+Alternatively, you can provide the bearer token directly in the Upload Headers field:
+```json
+{
+  "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9..."
+}
 ```
 
 ## Example Workflow
@@ -64,14 +71,20 @@ The node returns:
 ## Development
 
 ```bash
-# Install dependencies
-npm install
+# Install dependencies (using yarn)
+yarn install
 
 # Build
-npm run build
+yarn build
 
 # Development mode
-npm run dev
+yarn dev
+
+# Lint
+yarn lint
+
+# Type check
+yarn typecheck
 ```
 
 ## License
