@@ -1,0 +1,18 @@
+{
+	"extends": ["./tsconfig.json", "@n8n/typescript-config/tsconfig.build.json"],
+	"compilerOptions": {
+		"outDir": "dist",
+		"rootDir": "src",
+		"tsBuildInfoFile": "dist/typecheck.tsbuildinfo"
+	},
+	"include": [
+		"src/**/*.ts",
+		"src/**/*.json",
+		"src/**/*.svg"
+	],
+	"exclude": [
+		"node_modules",
+		"src/**/*.test.ts"
+	]
+}
+

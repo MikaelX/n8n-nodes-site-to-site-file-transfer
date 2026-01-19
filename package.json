@@ -1,0 +1,50 @@
+{
+	"name": "n8n-nodes-site-to-site-file-transfer",
+	"version": "1.0.0",
+	"description": "n8n node for streaming file transfers between URLs without loading files into memory",
+	"keywords": [
+		"n8n-community-node-package",
+		"n8n",
+		"n8n-nodes",
+		"file-transfer",
+		"streaming",
+		"upload",
+		"download"
+	],
+	"license": "MIT",
+	"main": "index.js",
+	"scripts": {
+		"dev": "n8n-node dev",
+		"build": "tsc --project tsconfig.build.cjs.json && node scripts/fix-node-exports.js",
+		"build:watch": "n8n-node build --watch",
+		"lint": "n8n-node lint",
+		"lint:fix": "n8n-node lint --fix",
+		"release": "n8n-node release",
+		"typecheck": "tsc --noEmit"
+	},
+	"files": [
+		"dist"
+	],
+	"n8n": {
+		"n8nNodesApiVersion": 1,
+		"nodes": [
+			"dist/nodes/SiteToSiteFileTransfer/SiteToSiteFileTransfer.node.js"
+		]
+	},
+	"dependencies": {
+		"n8n-workflow": "^1.120.0"
+	},
+	"devDependencies": {
+		"@eslint/js": "^9.39.1",
+		"@n8n/node-cli": "^0.17.0",
+		"@n8n/typescript-config": "^1.0.0",
+		"@types/node": "^20.0.0",
+		"eslint": "^9.39.1",
+		"globals": "^15.15.0",
+		"typescript": "^5.3.3",
+		"typescript-eslint": "^8.48.1"
+	},
+	"peerDependencies": {
+		"n8n-workflow": "^1.120.0"
+	}
+}

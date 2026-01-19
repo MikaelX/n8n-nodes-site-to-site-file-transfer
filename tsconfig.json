@@ -1,0 +1,36 @@
+{
+	"compilerOptions": {
+		"strict": true,
+		"module": "commonjs",
+		"moduleResolution": "node",
+		"target": "es2021",
+		"lib": ["es2021", "es2022.error", "dom"],
+		"removeComments": true,
+		"useUnknownInCatchVariables": false,
+		"forceConsistentCasingInFileNames": true,
+		"noImplicitAny": true,
+		"noImplicitReturns": false,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"strictNullChecks": true,
+		"preserveConstEnums": true,
+		"esModuleInterop": true,
+		"resolveJsonModule": true,
+		"incremental": true,
+		"declaration": false,
+		"sourceMap": true,
+		"skipLibCheck": true,
+		"emitDecoratorMetadata": true,
+		"experimentalDecorators": true,
+		"isolatedModules": false,
+		"verbatimModuleSyntax": false,
+		"noUncheckedIndexedAccess": false,
+		"noImplicitOverride": false,
+		"tsBuildInfoFile": "dist/typecheck.tsbuildinfo"
+	},
+	"include": [
+		"src/**/*.ts",
+		"src/**/*.json"
+	]
+}
+
