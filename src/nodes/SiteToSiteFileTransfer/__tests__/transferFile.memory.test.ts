@@ -1,10 +1,17 @@
 import type { IExecuteFunctions } from 'n8n-workflow';
 import { execute } from '../actions/transferFile.operation';
 import { Readable } from 'stream';
+import * as https from 'https';
+import * as http from 'http';
+
+// Mock native HTTP/HTTPS modules
+jest.mock('https');
+jest.mock('http');
 
 describe('transferFile.operation - Memory Usage', () => {
 	let mockExecuteFunctions: Partial<IExecuteFunctions>;
 	let mockRequest: jest.Mock;
+	let mockHttpsRequest: jest.Mock;
 	const fileSize = 50 * 1024 * 1024; // 50MB test file (smaller for faster tests)
 
 	// Helper to get memory usage in MB
@@ -38,6 +45,12 @@ describe('transferFile.operation - Memory Usage', () => {
 
 	beforeEach(() => {
 		mockRequest = jest.fn();
+		mockHttpsRequest = jest.fn();
+
+		// Mock HTTPS request using spyOn
+		jest.spyOn(https, 'request').mockImplementation(mockHttpsRequest as any);
+		// Mock HTTP request
+		jest.spyOn(http, 'request').mockImplementation(jest.fn() as any);
 
 		mockExecuteFunctions = {
 			getNodeParameter: jest.fn((param: string, _itemIndex: number, defaultValue?: any) => {
@@ -58,6 +71,37 @@ describe('transferFile.operation - Memory Usage', () => {
 		};
 	});
 
+	function createMockHttpResponse(statusCode: number, headers: Record<string, string>, body: Readable): any {
+		// Use the body stream directly as the response
+		// Add HTTP response properties to it
+		(body as any).statusCode = statusCode;
+		(body as any).headers = headers;
+		(body as any).destroy = jest.fn();
+		return body;
+	}
+
+	function createMockHttpRequest(mockRes: any): any {
+		const mockReq: any = {
+			on: jest.fn((event: string, callback: Function) => {
+				if (event === 'error') {
+					mockReq._errorCallback = callback;
+				}
+				return mockReq;
+			}),
+			end: jest.fn(),
+		};
+		
+		// Call the request callback with response
+		setImmediate(() => {
+			const requestCallback = mockHttpsRequest.mock.calls[mockHttpsRequest.mock.calls.length - 1]?.[1];
+			if (requestCallback) {
+				requestCallback(mockRes);
+			}
+		});
+		
+		return mockReq;
+	}
+
 	afterEach(() => {
 		jest.clearAllMocks();
 		// Small delay to allow streams to close
@@ -69,16 +113,12 @@ describe('transferFile.operation - Memory Usage', () => {
 		await new Promise((resolve) => setTimeout(resolve, 100));
 		const baselineMemory = getMemoryMB();
 
-		// Mock download response with large stream
+		// Mock download response with large stream using native HTTP
 		// Important: Create stream fresh for each call to simulate real behavior
 		const downloadStream = createLargeStream(fileSize);
-		mockRequest.mockResolvedValueOnce({
-			statusCode: 200,
-			headers: {
-				'content-length': String(fileSize),
-			},
-			body: downloadStream,
-		});
+		const mockRes = createMockHttpResponse(200, { 'content-length': String(fileSize) }, downloadStream);
+		const mockReq = createMockHttpRequest(mockRes);
+		mockHttpsRequest.mockReturnValue(mockReq);
 
 		// Mock upload response - simulate streaming upload WITHOUT buffering
 		// Critical: We must consume the stream without storing all chunks in memory
@@ -186,11 +226,9 @@ describe('transferFile.operation - Memory Usage', () => {
 		// Perform 3 transfers sequentially
 		for (let i = 0; i < 3; i++) {
 			const downloadStream = createLargeStream(fileSize);
-			mockRequest.mockResolvedValueOnce({
-				statusCode: 200,
-				headers: { 'content-length': String(fileSize) },
-				body: downloadStream,
-			});
+			const mockRes = createMockHttpResponse(200, { 'content-length': String(fileSize) }, downloadStream);
+			const mockReq = createMockHttpRequest(mockRes);
+			mockHttpsRequest.mockReturnValue(mockReq);
 			
 			mockRequest.mockImplementationOnce(async (options: any) => {
 				if (options.body && typeof options.body.pipe === 'function') {

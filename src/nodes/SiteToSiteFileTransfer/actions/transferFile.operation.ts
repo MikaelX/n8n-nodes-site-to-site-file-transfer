@@ -6,6 +6,9 @@ import type {
 	IDataObject,
 } from 'n8n-workflow';
 import { extractBearerToken, parseHeaders } from '../GenericFunctions';
+import { URL } from 'url';
+import * as http from 'http';
+import * as https from 'https';
 
 export const description: INodeProperties[] = [
 	{
@@ -136,93 +139,69 @@ export async function execute(
 	}
 
 	try {
-		// Start download request - use request helper for streaming
-		const downloadOptions: IRequestOptions = {
-			method: 'GET',
-			url: downloadUrl,
-			headers: finalDownloadHeaders,
-			encoding: null, // Get binary/stream response
-			resolveWithFullResponse: true,
-		};
+		// Use Node.js native HTTP/HTTPS for download to ensure true streaming
+		// n8n's helpers.request() may buffer responses even with encoding: null/stream
+		const downloadUrlObj = new URL(downloadUrl);
+		const downloadClient = downloadUrlObj.protocol === 'https:' ? https : http;
+		
+		const downloadStream = await new Promise<{ stream: NodeJS.ReadableStream; statusCode: number; headers: http.IncomingHttpHeaders }>((resolve, reject) => {
+			const downloadOptions = {
+				hostname: downloadUrlObj.hostname,
+				port: downloadUrlObj.port || (downloadUrlObj.protocol === 'https:' ? 443 : 80),
+				path: downloadUrlObj.pathname + downloadUrlObj.search,
+				method: 'GET',
+				headers: finalDownloadHeaders,
+			};
 
-		const downloadResponse = await this.helpers.request(downloadOptions);
-
-		// Check download response status
-		const downloadStatusCode = downloadResponse.statusCode;
-		if (downloadStatusCode !== undefined) {
-			if (downloadStatusCode < 200 || downloadStatusCode >= 300) {
-				const errorMessage = `Download failed with HTTP ${downloadStatusCode} from ${downloadUrl}. Please verify the download URL is accessible and returns a successful response.`;
-				if (throwOnError) {
-					throw new Error(errorMessage);
+			const req = downloadClient.request(downloadOptions, (res) => {
+				const statusCode = res.statusCode || 0;
+				
+				// Check status code
+				if (statusCode < 200 || statusCode >= 300) {
+					res.destroy();
+					const errorMessage = `Download failed with HTTP ${statusCode} from ${downloadUrl}. Please verify the download URL is accessible and returns a successful response.`;
+					reject(new Error(errorMessage));
+					return;
 				}
-				return {
-					json: {
-						error: errorMessage,
-						downloadStatus: downloadStatusCode,
-						downloadUrl,
-					} as IDataObject,
-					pairedItem: {
-						item: itemIndex,
-					},
-				};
-			}
-		}
 
-		// Get actual content length from response if not provided
-		const responseHeaders = downloadResponse.headers || {};
-		const actualContentLength = contentLength || responseHeaders['content-length'];
+				// Get actual content length from response if not provided
+				const actualContentLength = contentLength || res.headers['content-length'];
+				if (actualContentLength && !finalUploadHeaders['Content-Length']) {
+					const length =
+						typeof actualContentLength === 'number'
+							? actualContentLength
+							: parseInt(actualContentLength, 10);
+					if (!isNaN(length) && length > 0) {
+						finalUploadHeaders['Content-Length'] = String(length);
+					}
+				}
 
-		if (actualContentLength && !finalUploadHeaders['Content-Length']) {
-			const length =
-				typeof actualContentLength === 'number'
-					? actualContentLength
-					: parseInt(actualContentLength, 10);
-			if (!isNaN(length) && length > 0) {
-				finalUploadHeaders['Content-Length'] = String(length);
-			}
-		}
+				resolve({
+					stream: res,
+					statusCode,
+					headers: res.headers,
+				});
+			});
 
-		// Get the stream from download response
-		// The request helper returns response.body as a stream when encoding is null
-		const downloadStream = downloadResponse.body;
-		
-		// Strict check: only accept streams - no buffering fallbacks
-		// If response was buffered (Buffer) or parsed (object), fail immediately
-		if (Buffer.isBuffer(downloadStream)) {
-			throw new Error(
-				`Download response from ${downloadUrl} was buffered instead of streamed. ` +
-				`The response body is a Buffer (${downloadStream.length} bytes), which means the entire file was loaded into memory. ` +
-				`This defeats the purpose of streaming. Please ensure the download URL returns a stream. ` +
-				`Check that 'Accept: */*' header is set and encoding is null.`
-			);
-		}
-		
-		// Check if it's a valid stream with pipe method
-		if (!downloadStream || typeof (downloadStream as any).pipe !== 'function') {
-			const bodyType = typeof downloadStream;
-			const bodyConstructor = downloadStream?.constructor?.name || 'unknown';
-			const bodyPreview = downloadStream && typeof downloadStream === 'object' 
-				? JSON.stringify(downloadStream).substring(0, 200) 
-				: String(downloadStream).substring(0, 200);
-			
-			throw new Error(
-				`Download response from ${downloadUrl} is not a streamable format. ` +
-				`The response body type is: ${bodyType}, constructor: ${bodyConstructor}. ` +
-				(bodyPreview ? `Response preview: ${bodyPreview}${bodyPreview.length >= 200 ? '...' : ''}. ` : '') +
-				`This usually means the server returned JSON/text instead of binary data, or the response was parsed/buffered. ` +
-				`Please ensure the download URL returns a binary stream. ` +
-				`You may need to add headers like 'Accept: */*' to prevent automatic parsing.`
-			);
-		}
+			req.on('error', (error) => {
+				reject(new Error(`Download request failed: ${error.message}`));
+			});
+
+			req.end();
+		});
+
+		const downloadStatusCode = downloadStream.statusCode;
+		// downloadStream.stream is guaranteed to be a Node.js ReadableStream from native HTTP
+		// No need to check for Buffer or object - native HTTP always returns streams
 
 		// Pipe download stream directly to upload - no intermediate buffering
 		// The stream will be consumed chunk-by-chunk as it's uploaded
-		// Use helpers.request() instead of httpRequest() to ensure streaming (httpRequest may buffer)
+		// Use helpers.request() for upload (it handles stream bodies correctly)
 		const uploadOptions: IRequestOptions = {
 			method,
 			url: uploadUrl,
 			headers: finalUploadHeaders,
-			body: downloadStream, // Pipe download stream directly - streams without buffering entire file
+			body: downloadStream.stream, // Pipe native HTTP stream directly - guaranteed streaming
 			resolveWithFullResponse: true,
 		};
 
