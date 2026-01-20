@@ -49,8 +49,8 @@ function fixExports(filePath, className, exportName) {
 
 // Copy SVG icon file to dist
 function copySvgIcon() {
-	const srcSvg = path.join(__dirname, '../src/nodes/SiteToSiteFileTransfer/transfer.svg');
-	const distSvg = path.join(__dirname, '../dist/nodes/SiteToSiteFileTransfer/transfer.svg');
+	const srcSvg = path.join(__dirname, '../src/nodes/StreamFileTransfer/transfer.svg');
+	const distSvg = path.join(__dirname, '../dist/nodes/StreamFileTransfer/transfer.svg');
 	
 	if (!fs.existsSync(srcSvg)) {
 		console.warn(`⚠️  SVG icon not found: ${srcSvg}`);
@@ -68,9 +68,9 @@ function copySvgIcon() {
 }
 
 // Fix node file
-const nodeFile = path.join(__dirname, '../dist/nodes/SiteToSiteFileTransfer/SiteToSiteFileTransfer.node.js');
+const nodeFile = path.join(__dirname, '../dist/nodes/StreamFileTransfer/StreamFileTransfer.node.js');
 if (fs.existsSync(nodeFile)) {
-	fixExports(nodeFile, 'SiteToSiteFileTransfer', 'SiteToSiteFileTransfer');
+	fixExports(nodeFile, 'StreamFileTransfer', 'StreamFileTransfer');
 	console.log('✓ Fixed node exports');
 } else {
 	console.warn(`Node file not found: ${nodeFile}`);

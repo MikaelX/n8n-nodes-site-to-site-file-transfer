@@ -17,7 +17,7 @@ if (!fs.existsSync(distPath)) {
 }
 
 // Check if node file exists
-const nodeFile = path.join(distPath, 'nodes/SiteToSiteFileTransfer/SiteToSiteFileTransfer.node.js');
+const nodeFile = path.join(distPath, 'nodes/StreamFileTransfer/StreamFileTransfer.node.js');
 if (!fs.existsSync(nodeFile)) {
 	console.error('❌ Node file not found:', nodeFile);
 	errors++;
@@ -26,7 +26,7 @@ if (!fs.existsSync(nodeFile)) {
 	
 	// Check if file has proper exports
 	const content = fs.readFileSync(nodeFile, 'utf8');
-	if (!content.includes('exports.SiteToSiteFileTransfer') && !content.includes('module.exports.SiteToSiteFileTransfer')) {
+	if (!content.includes('exports.StreamFileTransfer') && !content.includes('module.exports.StreamFileTransfer')) {
 		console.warn('⚠️  Node file may not have proper exports');
 		warnings++;
 	} else {
@@ -35,7 +35,7 @@ if (!fs.existsSync(nodeFile)) {
 }
 
 // Check if icon exists
-const iconFile = path.join(__dirname, '../src/nodes/SiteToSiteFileTransfer/transfer.svg');
+const iconFile = path.join(__dirname, '../src/nodes/StreamFileTransfer/transfer.svg');
 if (!fs.existsSync(iconFile)) {
 	console.warn('⚠️  Icon file not found:', iconFile);
 	warnings++;

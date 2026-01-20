@@ -1,7 +1,7 @@
 /**
- * Site to Site File Transfer Node
+ * Stream File Transfer Node
  * 
- * Main node class for the n8n Site to Site File Transfer node.
+ * Main node class for the n8n Stream File Transfer node.
  * This node enables streaming file transfers between URLs without loading entire files into memory,
  * making it ideal for transferring large files (GB+) without causing memory exhaustion.
  * 
@@ -12,7 +12,7 @@
  * - Supports bearer token authentication (from URL query string or headers)
  * - Configurable HTTP methods (POST/PUT) and custom headers
  * 
- * @module SiteToSiteFileTransfer
+ * @module StreamFileTransfer
  */
 
 import type {
@@ -24,16 +24,16 @@ import type {
 import { NodeConnectionTypes } from 'n8n-workflow';
 import { operations } from './actions';
 
-export class SiteToSiteFileTransfer implements INodeType {
+export class StreamFileTransfer implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'Site to Site File Transfer',
-		name: 'siteToSiteFileTransfer',
+		displayName: 'Stream File Transfer',
+		name: 'streamFileTransfer',
 		icon: 'file:transfer.svg',
 		group: ['transform'],
 		version: 1,
 		description: 'Stream files from a download URL directly to an upload URL without loading into memory',
 		defaults: {
-			name: 'Site to Site File Transfer',
+			name: 'Stream File Transfer',
 		},
 		inputs: [NodeConnectionTypes.Main],
 		outputs: [NodeConnectionTypes.Main],
@@ -88,4 +88,4 @@ export class SiteToSiteFileTransfer implements INodeType {
 	}
 }
 
-export default SiteToSiteFileTransfer;
+export default StreamFileTransfer;
