@@ -5,7 +5,7 @@ import type {
 	IRequestOptions,
 	IDataObject,
 } from 'n8n-workflow';
-import { Readable, PassThrough } from 'stream';
+import { Readable } from 'stream';
 import { extractBearerToken, parseHeaders } from '../GenericFunctions';
 
 export const description: INodeProperties[] = [
@@ -228,19 +228,14 @@ export async function execute(
 			);
 		}
 
-		// Optimize stream buffer size for large file transfers
-		// Wrap stream with PassThrough to control highWaterMark (256KB for better network throughput)
-		// This reduces system calls while keeping memory usage reasonable (~256KB vs default 64KB)
-		const optimizedStream = new PassThrough({ highWaterMark: 256 * 1024 });
-		downloadStream.pipe(optimizedStream);
-
-		// Start upload request with optimized download stream as body
+		// Pipe download stream directly to upload - no intermediate buffering
+		// The stream will be consumed chunk-by-chunk as it's uploaded
 		// Use helpers.request() instead of httpRequest() to ensure streaming (httpRequest may buffer)
 		const uploadOptions: IRequestOptions = {
 			method,
 			url: uploadUrl,
 			headers: finalUploadHeaders,
-			body: optimizedStream, // Pipe optimized stream directly - streams without buffering entire file
+			body: downloadStream, // Pipe download stream directly - streams without buffering entire file
 			resolveWithFullResponse: true,
 		};
 
