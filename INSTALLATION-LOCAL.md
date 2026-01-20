@@ -14,11 +14,11 @@ cd /path/to/n8n
 Or manually:
 
 ```bash
-cd /path/to/n8n-nodes-stream-file-transfer
+cd /path/to/n8n-nodes-stream-file
 yarn build
 mkdir -p ~/.n8n/custom
-rm -rf ~/.n8n/custom/n8n-nodes-stream-file-transfer
-ln -sfn "$(pwd)/dist" ~/.n8n/custom/n8n-nodes-stream-file-transfer
+rm -rf ~/.n8n/custom/n8n-nodes-stream-file
+ln -sfn "$(pwd)/dist" ~/.n8n/custom/n8n-nodes-stream-file
 ```
 
 ## Development Workflow
@@ -27,7 +27,7 @@ ln -sfn "$(pwd)/dist" ~/.n8n/custom/n8n-nodes-stream-file-transfer
 
 1. **Build and link the node:**
    ```bash
-   cd /path/to/n8n-nodes-stream-file-transfer
+   cd /path/to/n8n-nodes-stream-file
    yarn build
    ./scripts/setup-link.sh  # or use the n8n script
    ```
@@ -49,7 +49,7 @@ Now any changes you make will automatically rebuild and n8n will reload the node
 
 1. **Build and link:**
    ```bash
-   cd /path/to/n8n-nodes-stream-file-transfer
+   cd /path/to/n8n-nodes-stream-file
    yarn build
    ./scripts/setup-link.sh
    ```
@@ -90,8 +90,8 @@ n8n automatically loads community nodes from `~/.n8n/custom/` directory. The sym
 
 ### Node Not Appearing
 
-- Check that the symlink exists: `ls -la ~/.n8n/custom/n8n-nodes-stream-file-transfer`
-- Verify the dist folder has the node: `ls -la ~/.n8n/custom/n8n-nodes-stream-file-transfer/nodes/`
+- Check that the symlink exists: `ls -la ~/.n8n/custom/n8n-nodes-stream-file`
+- Verify the dist folder has the node: `ls -la ~/.n8n/custom/n8n-nodes-stream-file/nodes/`
 - Check n8n logs for errors
 - Ensure `N8N_DEV_RELOAD=true` is set if using hot reload
 

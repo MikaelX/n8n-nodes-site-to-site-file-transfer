@@ -1,12 +1,14 @@
 {
-	"node": "n8n-nodes-stream-file-transfer.streamFileTransfer",
+	"node": "n8n-nodes-stream-file.streamFileTransfer",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
-	"categories": ["Data & Storage"],
+	"categories": [
+		"Data & Storage"
+	],
 	"resources": {
 		"primaryDocumentation": [
 			{
-				"url": "https://github.com/MikaelX/n8n-nodes-stream-file-transfer"
+				"url": "https://github.com/MikaelX/n8n-nodes-stream-file"
 			}
 		]
 	}

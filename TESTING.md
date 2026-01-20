@@ -53,8 +53,8 @@ yarn build
 
 # Link to n8n's custom nodes directory
 mkdir -p ~/.n8n/custom
-rm -rf ~/.n8n/custom/n8n-nodes-stream-file-transfer
-ln -sfn $(pwd)/dist ~/.n8n/custom/n8n-nodes-stream-file-transfer
+rm -rf ~/.n8n/custom/n8n-nodes-stream-file
+ln -sfn $(pwd)/dist ~/.n8n/custom/n8n-nodes-stream-file
 
 # Restart n8n or wait for auto-reload (if N8N_DEV_RELOAD=true)
 ```
@@ -66,7 +66,7 @@ ln -sfn $(pwd)/dist ~/.n8n/custom/n8n-nodes-stream-file-transfer
 yarn build
 
 # In your n8n installation directory
-yarn add /path/to/n8n-nodes-stream-file-transfer
+yarn add /path/to/n8n-nodes-stream-file
 
 # Restart n8n
 ```

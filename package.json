@@ -1,6 +1,6 @@
 {
-	"name": "n8n-nodes-stream-file-transfer",
-	"version": "1.0.12",
+	"name": "n8n-nodes-stream-file",
+	"version": "1.0.1",
 	"description": "n8n node for streaming file transfers between URLs without loading files into memory",
 	"keywords": [
 		"n8n-community-node-package",
@@ -9,12 +9,13 @@
 		"file-transfer",
 		"streaming",
 		"upload",
+		"upload",
 		"download"
 	],
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/MikaelX/n8n-nodes-stream-file-transfer.git"
+		"url": "https://github.com/MikaelX/n8n-nodes-stream-file.git"
 	},
 	"main": "index.js",
 	"scripts": {
